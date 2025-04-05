@@ -53,6 +53,9 @@ namespace qa_dotnet_cucumber.Hooks
         [BeforeScenario]
         public void BeforeScenario(ScenarioContext scenarioContext)
         {
+            // System.Diagnostics.Debugger.Launch(); // Prompts for debugger
+            Console.WriteLine("Debugger launched.");
+
             Console.WriteLine($"Starting {scenarioContext.ScenarioInfo.Title} on Thread {Thread.CurrentThread.ManagedThreadId} at {DateTime.Now}");
             new DriverManager().SetUpDriver(new ChromeConfig());
             var chromeOptions = new ChromeOptions();
@@ -67,6 +70,7 @@ namespace qa_dotnet_cucumber.Hooks
             _objectContainer.RegisterInstanceAs<IWebDriver>(driver);
             _objectContainer.RegisterInstanceAs(new NavigationHelper(driver));
             _objectContainer.RegisterInstanceAs(new LoginPage(driver));
+            _objectContainer.RegisterInstanceAs(new LanguagePage(driver));
 
             lock (_reportLock)
             {

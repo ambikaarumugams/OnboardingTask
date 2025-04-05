@@ -11,6 +11,7 @@ namespace qa_dotnet_cucumber.Steps
     {
         private readonly LoginPage _loginPage;
         private readonly NavigationHelper _navigationHelper;
+      
 
         public LoginSteps(LoginPage loginPage, NavigationHelper navigationHelper)
         {
@@ -18,29 +19,31 @@ namespace qa_dotnet_cucumber.Steps
             _navigationHelper = navigationHelper;
         }
 
-        [Given("I am on the login page")]
-        public void GivenIAmOnTheLoginPage()
+        [Given("I am on the home page")]
+        public void GivenIAmOnTheHomePage()
         {
-            _navigationHelper.NavigateTo("/login");
-            Assert.That(_loginPage.IsAtLoginPage(), Is.True, "Should be on the login page");
+            _navigationHelper.NavigateTo("Home");
+            Assert.That(_loginPage.IsAtHomePage(), Is.True, "Home page not loaded");
         }
 
-        [When("I enter valid credentials")]
-        public void WhenIEnterValidCredentials()
+        [When("I enter valid username and valid password")]
+        public void WhenIEnterValidUsernameAndValidPassword()
         {
-            _loginPage.Login("tomsmith", "SuperSecretPassword!");
+            _loginPage.Login("ambikaarumugams@gmail.com", "AmbikaSenthil123");
+           
         }
 
-        [When("I enter an invalid username and valid password")]
-        public void WhenIEnterAnInvalidUsernameAndValidPassword()
+        [When("I enter invalid username and valid password")]
+        public void WhenIEnterInvalidUsernameAndValidPassword()
         {
-            _loginPage.Login("invaliduser", "SuperSecretPassword!");
+            _loginPage.Login("admin123@gmail.com", "AmbikaSenthil123");
+            
         }
 
         [When("I enter a valid username and invalid password")]
         public void WhenIEnterAValidUsernameAndInvalidPassword()
         {
-            _loginPage.Login("tomsmith", "wrongpassword");
+            _loginPage.Login("ambikaarumugams@gmail.com", "Testanalyst");
         }
 
         [When("I enter empty credentials")]
@@ -49,11 +52,11 @@ namespace qa_dotnet_cucumber.Steps
             _loginPage.Login("", "");
         }
 
-        [Then("I should see the secure area")]
-        public void ThenIShouldSeeTheSecureArea()
+        [Then("I should see the successful message")]
+        public void ThenIShouldSeeTheSuccessfulMessage()
         {
             var successMessage = _loginPage.GetSuccessMessage();
-            Assert.That(successMessage, Does.Contain("You logged into a secure area!"), "Should see successful login message");
+            Assert.That(successMessage, Does.Contain("Hi"), "Profile page not loaded after login!");
         }
 
         [Then("I should see an error message")]
@@ -61,10 +64,12 @@ namespace qa_dotnet_cucumber.Steps
         {
             // Use LoginPage's driver to wait for and verify the error message
             var wait = new WebDriverWait(_loginPage.Driver, TimeSpan.FromSeconds(10));
-            var errorMessageElement = wait.Until(d => d.FindElement(By.CssSelector(".flash.error")));
+
+            var errorMessageElement = wait.Until(d => d.FindElement(By.CssSelector(".ns-type-error")));
             var errorMessage = errorMessageElement.Text;
-            Assert.That(errorMessage, Does.Match("Your username is invalid!|Your password is invalid!|Username is required"), 
-                "Should see an appropriate error message");
+            Console.WriteLine(errorMessage);
+
+            Assert.That(errorMessage, Does.Match("Confirm your email|Please enter a valid email address"), "Should see an appropriate error message");
         }
     }
 }
