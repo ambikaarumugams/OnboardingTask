@@ -29,7 +29,7 @@ namespace qa_dotnet_cucumber.Steps
         [When("I enter valid username and valid password")]
         public void WhenIEnterValidUsernameAndValidPassword()
         {
-            _loginPage.Login("ambikaarumugams@gmail.com", "AmbikaSenthil123");
+            _loginPage.Login(userName, password);
            
         }
 
