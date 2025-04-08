@@ -1,4 +1,5 @@
 ﻿using OpenQA.Selenium;
+using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 
@@ -15,27 +16,24 @@ namespace qa_dotnet_cucumber.Pages
         public LanguagePage(IWebDriver driver)       // Inject IWebDriver directly
         { 
             _driver = driver;
-            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(15));
+            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
         }
 
         //Locators
         private readonly By ProfileTab = By.XPath("//a[normalize-space()='Profile']");
-        private readonly By LanguagesTab = By.CssSelector(".item.active");
+        private readonly By LanguagesTab = By.XPath("//a[normalize-space()='Languages']");
         //Add
-        // private readonly By AddNewButton = By.XPath("//div[text()='Add New']");
-        private readonly By AddNewButton = By.XPath("//table[contains(@class,'ui fixed')]/thead[1]/tr[1]/th[3]/div[1]");
         private readonly By AddLanguagesField = By.XPath("//input[@placeholder='Add Language']");
         private readonly By SelectLanguageLevel = By.XPath("//select[@name='level']");
         private readonly By AddButton = By.XPath("//input[@value='Add']");
         private readonly By CancelButton = By.XPath("//input[@value='Cancel']");
+        private readonly By LanguageTable = By.XPath("//table[@class='ui fixed table'][.//th[normalize-space(text())='Language']]");       //whole table
         //Edit
-        private readonly By EditIcon = By.XPath("//table[@class='ui fixed table']/tbody/tr[1]/td[3]//i[@class='outline write icon'][1]");
-        private readonly By AddLanguageForUpdateField = By.XPath("//table[@class='ui fixed table']//tbody/tr//div//input[@type='text']");
-        private readonly By SelectLanguageLevelForUpdate = By.XPath("//table[@class='ui fixed table']//tbody/tr//div//select[@name='level']");
-        private readonly By UpdateButton = By.XPath("//input[@value='Update']");
+        private readonly By AddLanguageForUpdateField = By.XPath(".//input[@type='text']");
+        private readonly By UpdateButton = By.XPath(".//input[@value='Update']");
         private readonly By CancelUpdateButton = By.XPath("//span[@class='buttons-wrapper']//input[@value='Cancel']");
-        //Delete
-        private readonly By DeleteIcon = By.XPath("//table[@class='ui fixed table']/tbody/tr[1]/td[3]//i[@class='remove icon']");
+     //   private readonly By SuccessMessage = By.XPath("//div[@class='ns-box-inner']");
+
 
         //Action Methods
         public void NavigateToTheProfilePage()
@@ -50,9 +48,10 @@ namespace qa_dotnet_cucumber.Pages
         }
 
         public void AddNewLanguageAndLevel(string language,string languagelevel)
-        { 
+        {
             //Add New Languages
-            var addNewElement = _wait.Until(ExpectedConditions.ElementToBeClickable(AddNewButton));
+            var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
+            var addNewElement = languageTable.FindElement(By.XPath(".//div[@class='ui teal button ' and normalize-space(text())='Add New']"));
             addNewElement.Click();
 
             //Enter Language
@@ -80,49 +79,82 @@ namespace qa_dotnet_cucumber.Pages
             cancelButtonElement.Click();
         }
 
-        public void ClickEditIcon()
-        {
-            //Click Edit Icon
-            var clickEditIcon = _wait.Until(ExpectedConditions.ElementToBeClickable(EditIcon));
-            clickEditIcon.Click();
-        }
-
-        public void UpdateLanguageAndLevel(string updateLanguage, string updateLanguageLevel)
+        public void UpdateLanguageAndLevel(string existingLanguage, string languageToUpdate, string levelToUpdate)
         {
             try
             {
+                var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
+                var row = languageTable.FindElement(By.XPath($".//tr[td[normalize-space(text())='{existingLanguage}']]"));
+                var editIcon = row.FindElement(By.XPath(".//i[@class='outline write icon']"));
+                editIcon.Click();
+
+                var editableRow = languageTable.FindElement(By.XPath($".//tr[.//input[@type='text' and @value='{existingLanguage}']]"));
                 //Update the language
-                var addLanguageForUpdateElement = _wait.Until(ExpectedConditions.ElementToBeClickable(AddLanguageForUpdateField));
+                var addLanguageForUpdateElement = editableRow.FindElement(AddLanguageForUpdateField);
                 addLanguageForUpdateElement.Clear();
                 Thread.Sleep(1000);
-                addLanguageForUpdateElement.SendKeys(updateLanguage);
+                addLanguageForUpdateElement.SendKeys(languageToUpdate);
 
                 //Update Language Level
-                var selectLanguageLevelDropDown = _wait.Until(ExpectedConditions.ElementToBeClickable(SelectLanguageLevelForUpdate));
+                var selectLanguageLevelDropDown = editableRow.FindElement(By.XPath(".//select[@name='level']"));
 
                 SelectElement selectElement = new SelectElement(selectLanguageLevelDropDown);
-                selectElement.SelectByText(updateLanguageLevel);
+                selectElement.SelectByText(levelToUpdate);
 
-                _wait.Until(ExpectedConditions.ElementToBeClickable(UpdateButton)).Click();
+                editableRow.FindElement(UpdateButton).Click();
             }
-            catch(Exception ex)
-            { 
+            catch (Exception ex)
+            {
                 Console.WriteLine(ex);
             }
         }
 
         public void ClickCancelUpdate()
         {
+            //CancelUpdate
             var clickCancelUpdate = _wait.Until(ExpectedConditions.ElementToBeClickable(CancelUpdateButton));
             clickCancelUpdate.Click(); ;
         }
 
-        public void DeleteLanguageAndLevel()
+        public void DeleteAllLanguages()
         {
-            var clickDeleteIcon = _wait.Until(ExpectedConditions.ElementToBeClickable(DeleteIcon));
-            clickDeleteIcon.Click();
+            while (true)
+            {
+                var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
+                var deleteElements = languageTable.FindElements(By.XPath(".//i[@class='remove icon']"));
+
+                if(deleteElements.Count > 0)
+                {
+                    deleteElements[0].Click();
+                    Thread.Sleep(500);                  
+                }
+                else
+                {
+                    break;
+                }
+            }
         }
 
+        public string GetSuccessMessage()
+        {
+            var successMessage = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//div[contains(@class,'ns-type-success')]")));
+            return successMessage.Text;
+        }
+
+        public string GetTableText()
+        {
+            var rows = _driver.FindElements(By.XPath("//table[@class='ui fixed table']//tbody//tr"));
+            foreach (var row in rows)
+            {
+                var cells = row.FindElements(By.TagName("td"));
+                foreach (var cell in cells)
+                {
+                    Console.WriteLine(cell.Text);
+                    return cell.Text;
+                }
+            }
+            return string.Empty;
+        }
     }
 }
 

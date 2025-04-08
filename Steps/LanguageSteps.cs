@@ -1,9 +1,12 @@
-﻿using qa_dotnet_cucumber.Pages;
+﻿using AngleSharp.Text;
+using qa_dotnet_cucumber.Pages;
+using RazorEngine;
 using Reqnroll;
 
 namespace qa_dotnet_cucumber.Steps
 {
     [Binding]
+    [Scope(Feature = "Language Feature")]
     public class LanguageSteps
     {
         private readonly LoginPage _loginPage;
@@ -22,18 +25,13 @@ namespace qa_dotnet_cucumber.Steps
         {
             _navigationHelper.NavigateTo("Home");
             _loginPage.Login("ambikaarumugams@gmail.com", "AmbikaSenthil123");
-        }
-
-        [When("I click Add New button")]
-        public void WhenIClickAddNewButton()
-        {
             _languagePage.NavigateToTheProfilePage();
-
         }
 
         [When("I Add New Language and select New Language level:")]
         public void WhenIAddNewLanguageAndSelectNewLanguageLevel(DataTable addLanguageTable)
         {
+            _languagePage.DeleteAllLanguages(); //Delete all the languages in the list before adding new
             foreach (var addNewList in addLanguageTable.Rows)
             {
                 var newLanguage = addNewList["New Language"];
@@ -46,13 +44,7 @@ namespace qa_dotnet_cucumber.Steps
         [Then("I should see the languages listed in my profile")]
         public void ThenIShouldSeeTheLanguagesListedInMyProfile()
         {
-            Console.WriteLine("Languages are added");
-        }
-
-        [When("I click the edit icon of the language")]
-        public void WhenIClickTheEditIconOfTheLanguage()
-        {
-            _languagePage.ClickEditIcon();
+            Assert.That(_languagePage.GetSuccessMessage(), Does.Contain("Tamil"), "There is a mismatch!");
         }
 
         [When("I update the language and language level:")]
@@ -60,14 +52,10 @@ namespace qa_dotnet_cucumber.Steps
         {
             foreach (var list in updateLanguageTable.Rows)
             {
-                //Console.WriteLine(list);
-                //var language_1 = list[0];
-                //var language_2 = list[1];
-
-                var language = list["Language"];
-                var languagelevel = list["Language level"];
-
-                _languagePage.UpdateLanguageAndLevel(language, languagelevel);
+                var language = list["Existing Language"];
+                var languageToUpdate = list["Language to Update"];
+                var languagelevelToUpdate = list["Language level to Update"];
+                _languagePage.UpdateLanguageAndLevel(language, languageToUpdate, languagelevelToUpdate);
             }
         }
 
@@ -77,5 +65,20 @@ namespace qa_dotnet_cucumber.Steps
             Console.WriteLine("The Language updated successfully");
 
         }
+
+        [When("I click the delete icon of the language")]
+        public void WhenIClickTheDeleteIconOfTheLanguage()
+        {
+            _languagePage.DeleteAllLanguages();   
+        }
+
+        [Then("I shouldn't see the languages list")]
+        public void ThenIShouldntSeeTheLanguagesList()
+        {
+            Console.WriteLine("The Language deleted successfully");
+        }
+
+        
+
     }
 }

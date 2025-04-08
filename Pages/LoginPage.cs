@@ -1,6 +1,5 @@
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
-using Reqnroll.BoDi;
 // MUST USE with ExpectedConditions
 using SeleniumExtras.WaitHelpers;
 
@@ -26,6 +25,7 @@ namespace qa_dotnet_cucumber.Pages
         }
         
         //Action Methods
+
         public void Login(string username, string password)
         {
             var signInLink = _wait.Until(ExpectedConditions.ElementToBeClickable(SignIn));
@@ -41,16 +41,42 @@ namespace qa_dotnet_cucumber.Pages
             loginButtonElement.Click();
         }
 
-       
+        public bool IsAtHomePage()
+        {
+            return _driver.Title.Contains("Home");
+        }
+
         public string GetSuccessMessage()
         {
             var element = _driver.FindElement(SuccessMessage);
             return _wait.Until(d => d.FindElement(SuccessMessage)).Text;
         }
 
-        public bool IsAtHomePage()
+        public bool IsErrorMsgDisplayed(string errorMessage)
         {
-            return _driver.Title.Contains("Home");
+            try
+            {
+                var popUpMessageElement = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[contains(@class, 'ns-box-inner') and contains(text(), '{errorMessage}')]")));
+                return true;// Found the Error message
+            }
+            catch
+            {
+                return false;
+            }
         }
+
+        public bool IsValidationMsgDisplayed(string validationMeassage)
+        {
+            try
+            {
+                _wait.Until(d => d.FindElement(By.XPath($"//div[contains(text(),'{validationMeassage}')]")));
+                return true; // Found the validation message
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
     }
 }
