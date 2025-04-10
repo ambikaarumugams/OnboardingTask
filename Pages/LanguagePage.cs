@@ -135,25 +135,70 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
-        public string GetSuccessMessage()
+        public string GetSuccessMessageForAddNew(string language)
         {
-            var successMessage = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//div[contains(@class,'ns-type-success')]")));
-            return successMessage.Text;
+            try
+            {
+                var successMessage = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and  contains(text(), '{language} has been added to your languages')]")));
+                return successMessage.Text;
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
 
-        public string GetTableText()
+        public List<string> GetAllAddedLanguages()
         {
-            var rows = _driver.FindElements(By.XPath("//table[@class='ui fixed table']//tbody//tr"));
-            foreach (var row in rows)
+            try
             {
-                var cells = row.FindElements(By.TagName("td"));
-                foreach (var cell in cells)
+                var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
+                var addedLanguages = new List<string>();
+                var rows = languageTable.FindElements(By.XPath(".//tbody/tr"));
+                foreach (var row in rows)
                 {
-                    Console.WriteLine(cell.Text);
-                    return cell.Text;
+                    var languageCell = row.FindElement(By.XPath("./td[1]"));
+                    addedLanguages.Add(languageCell.Text.Trim());
                 }
+                return addedLanguages;
             }
-            return string.Empty;
+            catch
+            {
+                return new List<string>();
+            }
+        }
+
+        public string GetSuccessMessageForUpdate(string language)
+        {
+            try
+            {
+                var successMessage = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and  contains(text(), '{language} has been added to your languages')]")));
+                return successMessage.Text;
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        public List<string> GetAllUpdatedLanguages()
+        {
+            try
+            {
+                var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
+                var addedLanguages = new List<string>();
+                var rows = languageTable.FindElements(By.XPath(".//tbody/tr"));
+                foreach (var row in rows)
+                {
+                    var languageCell = row.FindElement(By.XPath("./td[1]"));
+                    addedLanguages.Add(languageCell.Text.Trim());
+                }
+                return addedLanguages;
+            }
+            catch
+            {
+                return new List<string>();
+            }
         }
     }
 }
