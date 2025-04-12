@@ -21,8 +21,13 @@ Scenario: As a user, I want to Edit the existing languages in my profile
 		| ExistingLanguage | LanguageToUpdate | LanguageLevelToUpdate |
 		| Tamil            | Hindi            | Conversational        |
 		| French           | Chinese          | Basic                 |
-	Then I should see the updated language in my profile
+	Then I should see the success message and updated language in my profile
 
-Scenario: As a user, I want to delete the existing language
-	When I click the delete icon of the language
-	Then I shouldn't see the languages list
+Scenario: As a user, I want to delete the existing languages from my profile
+	When I click the delete icon corresponding to the following languages:
+    | LanguageToBeDeleted |
+    | French              |
+    | German              |
+
+  Then I should see a success message for each deleted language
+  And the languages table should be empty if all languages have been deleted

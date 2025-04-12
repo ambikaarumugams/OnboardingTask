@@ -2,6 +2,7 @@
 using OpenQA.Selenium.Internal;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
+using System.Linq;
 
 
 namespace qa_dotnet_cucumber.Pages
@@ -10,11 +11,11 @@ namespace qa_dotnet_cucumber.Pages
     {
         private readonly IWebDriver _driver;
         private readonly WebDriverWait _wait;
-        public IWebDriver Driver => _driver;         
+        public IWebDriver Driver => _driver;
 
         //Constructor
         public LanguagePage(IWebDriver driver)       // Inject IWebDriver directly
-        { 
+        {
             _driver = driver;
             _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(10));
         }
@@ -32,7 +33,7 @@ namespace qa_dotnet_cucumber.Pages
         private readonly By AddLanguageForUpdateField = By.XPath(".//input[@type='text']");
         private readonly By UpdateButton = By.XPath(".//input[@value='Update']");
         private readonly By CancelUpdateButton = By.XPath("//span[@class='buttons-wrapper']//input[@value='Cancel']");
-     //   private readonly By SuccessMessage = By.XPath("//div[@class='ns-box-inner']");
+        // private readonly By SuccessMessage = By.XPath("//div[@class='ns-box-inner']");
 
 
         //Action Methods
@@ -47,7 +48,7 @@ namespace qa_dotnet_cucumber.Pages
             languagesElement.Click();
         }
 
-        public void AddNewLanguageAndLevel(string language,string languagelevel)
+        public void AddNewLanguageAndLevel(string language, string languagelevel)
         {
             //Add New Languages
             var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
@@ -63,7 +64,7 @@ namespace qa_dotnet_cucumber.Pages
 
             SelectElement selectElement = new SelectElement(selectLanguageLevelDropDown);
             selectElement.SelectByText(languagelevel);
-        } 
+        }
 
         public void ClickAddButton()
         {
@@ -75,7 +76,7 @@ namespace qa_dotnet_cucumber.Pages
         public void ClickCancelButton()
         {
             //Click Cancel Button
-            var cancelButtonElement=_wait.Until(ExpectedConditions.ElementToBeClickable(CancelButton));
+            var cancelButtonElement = _wait.Until(ExpectedConditions.ElementToBeClickable(CancelButton));
             cancelButtonElement.Click();
         }
 
@@ -116,6 +117,48 @@ namespace qa_dotnet_cucumber.Pages
             clickCancelUpdate.Click(); ;
         }
 
+        //public List<string> GetLanguageListBeforeDelete()
+        //{
+        //    try
+        //    {
+        //        var languageListBefordelete = new List<string>();
+        //        var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
+
+        //        var rows = languageTable.FindElements(By.XPath(".//tbody/tr"));
+        //        foreach (var row in rows)
+        //        {
+        //            var languageCell = row.FindElement(By.XPath("./td"));
+        //            var languageName = languageCell.Text.Trim();
+        //        }
+        //        return languageListBefordelete;
+        //    }
+        //    catch
+        //    {
+        //        return new List<string>();
+        //    }
+        //}
+
+        public void DeleteSpecificLanguage(string languageToBeDeleted)
+        {
+            if (languageToBeDeleted == null || !languageToBeDeleted.Any())
+                throw new ArgumentException("Language list is empty or null");
+
+            var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
+            var row = languageTable.FindElement(By.XPath($".//tr[td[normalize-space(text())='{languageToBeDeleted}']]"));
+            var deleteIconElement = row.FindElement(By.XPath(".//i[@class='remove icon']"));
+            deleteIconElement.Click();
+               
+        }
+
+
+        public bool IsLanguageTableEmpty()
+        {
+            var rows = _driver.FindElements(By.XPath("//table[@class='ui fixed table']//tbody/tr"));
+            return rows.Count == 0;
+        }
+
+     
+
         public void DeleteAllLanguages()
         {
             while (true)
@@ -123,10 +166,10 @@ namespace qa_dotnet_cucumber.Pages
                 var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
                 var deleteElements = languageTable.FindElements(By.XPath(".//i[@class='remove icon']"));
 
-                if(deleteElements.Count > 0)
+                if (deleteElements.Count > 0)
                 {
                     deleteElements[0].Click();
-                    Thread.Sleep(500);                  
+                    Thread.Sleep(500);
                 }
                 else
                 {
@@ -135,11 +178,11 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
-        public string GetSuccessMessageForAddNew(string language)
+        public string GetSuccessMessageForAddNew(string languageToBeAdded)
         {
             try
             {
-                var successMessage = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and  contains(text(), '{language} has been added to your languages')]")));
+                var successMessage = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and  contains(text(), '{languageToBeAdded} has been added to your languages')]")));
                 return successMessage.Text;
             }
             catch
@@ -168,12 +211,12 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
-        public string GetSuccessMessageForUpdate(string language)
+        public string GetSuccessMessageForUpdate(string languageToBeUpdated)
         {
             try
             {
-                var successMessage = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and  contains(text(), '{language} has been added to your languages')]")));
-                return successMessage.Text;
+                var successMessageForUpdate = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and  contains(text(), '{languageToBeUpdated} has been updated to your languages')]")));
+                return successMessageForUpdate.Text;
             }
             catch
             {
@@ -199,6 +242,13 @@ namespace qa_dotnet_cucumber.Pages
             {
                 return new List<string>();
             }
+        }
+
+        public string GetSuccessMessageForDelete(string languageToBeDeleted)
+        {
+            Thread.Sleep(1000);
+            var successMessageForDelete = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and  contains(text(), '{languageToBeDeleted} has been deleted from your languages')]")));
+            return successMessageForDelete.Text;
         }
     }
 }
