@@ -31,3 +31,4 @@ Scenario: As a user, I want to delete the existing languages from my profile
 
   Then I should see a success message for each deleted language
   And the languages table should be empty if all languages have been deleted
+   

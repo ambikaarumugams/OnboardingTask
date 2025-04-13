@@ -9,8 +9,7 @@ namespace qa_dotnet_cucumber.Steps
         private readonly LoginPage _loginPage;
         private readonly NavigationHelper _navigationHelper;
 
-
-        public LoginSteps(LoginPage loginPage, NavigationHelper navigationHelper)
+        public LoginSteps(LoginPage loginPage, NavigationHelper navigationHelper)   
         {
             _loginPage = loginPage;
             _navigationHelper = navigationHelper;

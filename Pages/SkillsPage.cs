@@ -10,11 +10,12 @@ namespace qa_dotnet_cucumber.Pages
         private readonly WebDriverWait _wait;
         public IWebDriver Driver { get { return _driver; } }
 
-        public SkillsPage(IWebDriver driver)
+        public SkillsPage(IWebDriver driver)  //Inject the driver directly
         {
             _driver = driver;
-            _wait = new WebDriverWait(_driver,TimeSpan.FromSeconds(5));
+            _wait = new WebDriverWait(_driver, TimeSpan.FromSeconds(5));
         }
+
         //Locators
         private readonly By ProfileTab = By.XPath("//a[normalize-space()='Profile']");
         private readonly By SkillsTab = By.XPath("//a[normalize-space()='Skills']");
@@ -43,7 +44,7 @@ namespace qa_dotnet_cucumber.Pages
             var skillsElement = _wait.Until(ExpectedConditions.ElementToBeClickable(SkillsTab));
             skillsElement.Click();
         }
-        public void AddNewSkillsAndLevel(string skills, string skilllevel)
+        public void AddNewSkillsAndLevel(string skills, string skillLevel)
         {
             //Add New Skills
             var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
@@ -58,7 +59,7 @@ namespace qa_dotnet_cucumber.Pages
             var selectSkillLevelDropDown = _wait.Until(ExpectedConditions.ElementToBeClickable(SelectSkillLevel));
 
             SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
-            selectElement.SelectByText(skilllevel);
+            selectElement.SelectByText(skillLevel);
         }
 
         public void ClickAddButton()
@@ -104,15 +105,24 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
-        public void ClickCancelUpdate()
+        public void ClickCancelUpdate()  //CancelUpdate
         {
-            //CancelUpdate
             var clickCancelUpdate = _wait.Until(ExpectedConditions.ElementToBeClickable(CancelUpdateButton));
-            clickCancelUpdate.Click(); ;
+            clickCancelUpdate.Click();
         }
 
+        public void DeleteSpecificSkills(string skillsToBeDeleted)    //To delete the specific skill 
+        {
+            if (skillsToBeDeleted == null || !skillsToBeDeleted.Any()) //To avoid object reference null exception
+                throw new ArgumentException("Language list is empty or null");
 
-        public void DeleteAllSkills()
+            var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+            var row = languageTable.FindElement(By.XPath($".//tr[td[normalize-space(text())='{skillsToBeDeleted}']]"));
+            var deleteIconElement = row.FindElement(By.XPath(".//i[@class='remove icon']"));
+            deleteIconElement.Click();
+        }
+
+        public void DeleteAllSkills()    //To delete all skills 
         {
             while (true)
             {
@@ -130,7 +140,75 @@ namespace qa_dotnet_cucumber.Pages
                 }
             }
         }
+
+        public string GetSuccessMeassageForAddSkill(string newSkill)  //To get the success message after adding skill for validation
+        {
+            var successMessageForAddSkill = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and contains(text(), '{newSkill} has been added to your skills')]")));
+            return successMessageForAddSkill.Text;
+        }
+
+        public List<string> GetAllAddedSkillList()    //To get all the skills list after adding for validation
+        {
+            try
+            {
+                var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+                var addedSkills = new List<string>();
+                var rows = skillsTable.FindElements(By.XPath(".//tbody/tr"));
+                foreach (var row in rows)
+                {
+                    var skillCell = row.FindElement(By.XPath("./td[1]"));
+                    addedSkills.Add(skillCell.Text.Trim());
+                }
+                return addedSkills;
+            }
+            catch
+            {
+                return new List<string>();
+            }
+        }
+
+        public string GetUpdatedSkillSuccessMessage(string updateSkill)   //To get success message after updating skills for validation
+        {
+            var successMessageForUpdateSkill = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and contains(text(), '{updateSkill} has been updated to your skills')]")));
+            return successMessageForUpdateSkill.Text;
+        }
+
+        public List<string> GetAllUpdatedSkillsList()    //To get all the updated list for validation
+        {
+            try
+            {
+                var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+                var updatedSkills = new List<string>();
+                var rows = skillsTable.FindElements(By.XPath(".//tbody/tr"));
+                foreach (var row in rows)
+                {
+                    var skillCell = row.FindElement(By.XPath("./td[1]"));
+                    updatedSkills.Add(skillCell.Text.Trim());
+                }
+                return updatedSkills;
+            }
+            catch
+            {
+                return new List<string>();
+            }
+        }
+
+        public string GetSuccessMessageForDeleteSkill(string skillToBeDeleted)    //To get success message after deleting a skill 
+        {
+            Thread.Sleep(1000);
+            var successMessageForDelete = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and  contains(text(), '{skillToBeDeleted} has been deleted')]")));
+            return successMessageForDelete.Text;
+        }
+
+        public bool IsSkillsTableEmpty()  //To check the table is empty after deleting all skills for validation
+        {
+            var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+            var rows = skillsTable.FindElements(By.XPath(".//tbody/tr"));
+            return rows.Count == 0;
+        }
     }
 }
+
+
 
 
