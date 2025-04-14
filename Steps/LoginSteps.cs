@@ -28,6 +28,12 @@ namespace qa_dotnet_cucumber.Steps
             _loginPage.Login("ambikaarumugams@gmail.com", "AmbikaSenthil123");
         }
 
+        [When("I enter invalid username and invalid password")]
+        public void WhenIEnterInvalidUsernameAndInvalidPassword()
+        {
+            _loginPage.Login("admintest@gmail.com", "admin123");
+        }
+       
         [When("I enter invalid username and valid password")]
         public void WhenIEnterInvalidUsernameAndValidPassword()
         {
@@ -58,7 +64,6 @@ namespace qa_dotnet_cucumber.Steps
             _loginPage.Login("a@b.com", "");
         }
 
-
         [Then("I should see the successful message")]
         public void ThenIShouldSeeTheSuccessfulMessage()
         {
@@ -85,5 +90,18 @@ namespace qa_dotnet_cucumber.Steps
             Assert.That(_loginPage.IsValidationMsgDisplayed(validationMessage), Is.True, $"Validation Message \"{validationMessage}\" should be displayed");
         }
 
+        [Then("I should see {string} error message and {string} notification")]
+        public void ThenIShouldSeeErrorMessageAndNotification(string errorMessage , string verificationOption)
+        {
+            Assert.That(_loginPage.IsErrorMsgDisplayed(errorMessage), Is.True, $"Error Message {errorMessage} should be displayed");
+            Assert.That(_loginPage.IsVerificationOptionAvailable(verificationOption), Is.True, $"Verification option \"{verificationOption}\" should be displayed");
+        }
+
+        [When("I click {string} button I should see {string} message")]
+        public void WhenIClickButtonIShouldSeeMessage(string sendVerificationEmail, string verificationMessage)
+        {
+            _loginPage.ClickSendVerificationEmail(sendVerificationEmail);
+            Assert.That(_loginPage.IsVerificationMessageDisplayed(verificationMessage), Is.True, $"Verification message \"{verificationMessage}\" should be displayed");
+        }
     }
 }

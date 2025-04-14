@@ -77,5 +77,37 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
+        public bool IsVerificationOptionAvailable(string verificationOption)
+        {
+            try
+            {
+                _wait.Until(d => d.FindElement(By.XPath($"//button[@id='submit-btn' and normalize-space(text())='{verificationOption}']")));
+                return true;// Found the veification o
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public void ClickSendVerificationEmail(string sendVerificationEmail)
+        {
+            _wait.Until(d => d.FindElement(By.XPath($"//button[@id='submit-btn' and normalize-space(text())='{sendVerificationEmail}']"))).Click();
+        }
+
+        public bool IsVerificationMessageDisplayed(string verificationMessage)
+        {
+            try
+            {
+                _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[contains(@class, 'ns-box-inner') and contains(normalize-space(text()), '{verificationMessage}')]")));
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        
+
     }
 }

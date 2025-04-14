@@ -10,7 +10,8 @@ Background:
 		| Tamil       | Native/Bilingual |
 		| English     | Fluent           |
 		| French      | Basic            |
-		| German      | Conversational   |
+		| Spanish     | Basic            |
+	
 	And I should verify the languages has been added successfully
 	Then I should verify the languages listed in my profile
 
@@ -25,10 +26,10 @@ Scenario: As a user, I want to Edit the existing languages in my profile
 
 Scenario: As a user, I want to delete the existing languages from my profile
 	When I click the delete icon corresponding to the following languages:
-    | LanguageToBeDeleted |
-    | French              |
-    | German              |
+		| LanguageToBeDeleted |
+		| French              |
+		| German              |
 
-  Then I should see a success message for each deleted language
-  And the languages table should be empty if all languages have been deleted
+	Then I should see a success message for each deleted language
+	And the languages table should be empty if all languages have been deleted
    
