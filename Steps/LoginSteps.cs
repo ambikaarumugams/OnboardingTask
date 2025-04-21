@@ -4,6 +4,7 @@ using qa_dotnet_cucumber.Pages;
 namespace qa_dotnet_cucumber.Steps
 {
     [Binding]
+    [Scope(Feature ="Login")]
     public class LoginSteps
     {
         private readonly LoginPage _loginPage;

@@ -44,6 +44,7 @@ namespace qa_dotnet_cucumber.Pages
             var skillsElement = _wait.Until(ExpectedConditions.ElementToBeClickable(SkillsTab));
             skillsElement.Click();
         }
+
         public void AddNewSkillsAndLevel(string skills, string skillLevel)
         {
             //Add New Skills
@@ -205,6 +206,88 @@ namespace qa_dotnet_cucumber.Pages
             var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
             var rows = skillsTable.FindElements(By.XPath(".//tbody/tr"));
             return rows.Count == 0;
+        }
+
+        public void LeaveTheSkillFieldEmpty()    //To leave the skill field empty
+        {
+            //Click Add New Button
+            var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+            var addNewElement = skillsTable.FindElement(By.XPath(".//div[@class='ui teal button']"));
+            addNewElement.Click();
+
+            //Enter Skills
+            var addSkillsElement = _wait.Until(ExpectedConditions.ElementToBeClickable(AddSkillsField));
+            addSkillsElement.SendKeys("");
+
+            //Select Skill Level
+            var selectSkillLevelDropDown = _wait.Until(ExpectedConditions.ElementToBeClickable(SelectSkillLevel));
+
+            SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
+            selectElement.SelectByText("Intermediate");
+        }
+
+        public void NotChoosingSkillLevel()   //Not choosing the skill level
+        {
+            //Click Add New Button
+            var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+            var addNewElement = skillsTable.FindElement(By.XPath(".//div[@class='ui teal button']"));
+            addNewElement.Click();
+
+            //Enter Skills
+            var addSkillsElement = _wait.Until(ExpectedConditions.ElementToBeClickable(AddSkillsField));
+            addSkillsElement.SendKeys("Dancing");
+
+            //Select Skill Level
+            var selectSkillLevelDropDown = _wait.Until(ExpectedConditions.ElementToBeClickable(SelectSkillLevel));
+
+            SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
+            selectElement.SelectByText("Choose Skill Level");
+            //  selectElement.SelectByValue("");
+        }
+
+        public void LeaveTheSkillFieldEmptyAndNotChoosingSkillLevel()   //Not selecting both skill and it's level
+        {
+            //Click Add New Button
+            var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+            var addNewElement = skillsTable.FindElement(By.XPath(".//div[@class='ui teal button']"));
+            addNewElement.Click();
+
+            //Enter Skills
+            var addSkillsElement = _wait.Until(ExpectedConditions.ElementToBeClickable(AddSkillsField));
+            addSkillsElement.SendKeys("");
+
+            //Select Skill Level
+            var selectSkillLevelDropDown = _wait.Until(ExpectedConditions.ElementToBeClickable(SelectSkillLevel));
+
+            SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
+            selectElement.SelectByText("Choose Skill Level");
+            // selectElement.SelectByValue("")
+        }
+
+        public bool IsErrorMessageDisplayed(string error)  //Error Message for both and any of the fields empty
+        {
+            try
+            {
+                var popUpMessageElement = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[contains(@class, 'ns-box-inner') and contains(text(), '{error}')]")));
+                return true;// Found the Error message
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool IsCancelButtonNotDisplayed()       //Ckeck the visiblity of cancel button 
+        {
+            try
+            {
+                var cancelButtonNotVisible = _wait.Until(ExpectedConditions.InvisibilityOfElementLocated(CancelButton));
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

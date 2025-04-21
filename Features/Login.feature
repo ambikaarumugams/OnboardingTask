@@ -1,4 +1,4 @@
-Feature: Login Feature
+Feature: Login
   As a user, I want to log in to the application to access restricted content.
 
 Background: 
@@ -15,11 +15,13 @@ Background:
 
   Scenario: Fail login with invalid username
    When I enter invalid username and valid password
-   Then I should see "Confirm your email" error message
+   Then I should see "Confirm your email" error message and "Send Verification Email" notification
+   When I click "Send Verification Email" button I should see "Email Verification Failed" message
     
   Scenario: Fail login with invalid password
    When I enter a valid username and invalid password
    Then I should see "Confirm your email" error message and "Send Verification Email" notification
+     When I click "Send Verification Email" button I should see "Email Verification Sent" message
     
   Scenario: Fail login with empty credentials
    When I enter empty credentials

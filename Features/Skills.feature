@@ -1,4 +1,4 @@
-﻿Feature: Skills Feature
+﻿Feature: Skills
 As a registered user, I would like to add the skills into my profile page
 So that others can see which skills I know
 
@@ -10,8 +10,8 @@ Background:
 		| Team work       | Intermediate |
 		| Communication   | Expert       |
 		| Adaptability    | Intermediate |
-	And I should verify the skills has been added successfully
-	Then I should verify the skills listed in my profile
+	And I should see the skills and verify it has been added successfully
+	Then I should see the skills listed in my profile and verify it
 
 Scenario: Add skills into the profile
 	
@@ -29,7 +29,13 @@ Scenario: As a user, I want to delete the existing skill from my profile
 		| Communication     |
 	Then I should see a success message for each deleted skill
 	And the skills table should be empty if all skills have been deleted
-   
+
+Scenario: As a user, I want to Edit the existing skills by giving same skill and different level in my profile
+	When I update the skill and skill level:
+	| ExistingSkill | SkillToUpdate   | SkillLevelToUpdate |
+	| Communication | Communication | Intermediate            |
+	Then I should see the success message and updated skill in my profile
+	   
 
 
 	

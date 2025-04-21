@@ -40,18 +40,18 @@ namespace qa_dotnet_cucumber.Pages
             loginButtonElement.Click();
         }
 
-        public bool IsAtHomePage()
+        public bool IsAtHomePage()   //To check it's on the Home page
         {
             return _driver.Title.Contains("Home");
         }
 
-        public string GetSuccessMessage()
+        public string GetSuccessMessage()   //To get successful login message
         {
             var element = _driver.FindElement(SuccessMessage);
             return _wait.Until(d => d.FindElement(SuccessMessage)).Text;
         }
 
-        public bool IsErrorMsgDisplayed(string errorMessage)
+        public bool IsErrorMsgDisplayed(string errorMessage) // To check the error message displayed or not
         {
             try
             {
@@ -64,7 +64,7 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
-        public bool IsValidationMsgDisplayed(string validationMeassage)
+        public bool IsValidationMsgDisplayed(string validationMeassage) //To check the validation message is displayed or not
         {
             try
             {
@@ -77,12 +77,12 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
-        public bool IsVerificationOptionAvailable(string verificationOption)
+        public bool IsVerificationOptionAvailable(string verificationOption)  //To check the verification option
         {
             try
             {
                 _wait.Until(d => d.FindElement(By.XPath($"//button[@id='submit-btn' and normalize-space(text())='{verificationOption}']")));
-                return true;// Found the veification o
+                return true;// Found the veification 
             }
             catch
             {
@@ -90,12 +90,12 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
-        public void ClickSendVerificationEmail(string sendVerificationEmail)
+        public void ClickSendVerificationEmail(string sendVerificationEmail) //To click the send verification email button
         {
             _wait.Until(d => d.FindElement(By.XPath($"//button[@id='submit-btn' and normalize-space(text())='{sendVerificationEmail}']"))).Click();
         }
 
-        public bool IsVerificationMessageDisplayed(string verificationMessage)
+        public bool IsVerificationMessageDisplayed(string verificationMessage) //To check verification message displayed or not
         {
             try
             {
@@ -107,7 +107,5 @@ namespace qa_dotnet_cucumber.Pages
                 return false;
             }
         }
-        
-
     }
 }
