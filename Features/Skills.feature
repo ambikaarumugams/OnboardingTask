@@ -32,13 +32,13 @@ Scenario: As a user, I want to delete the existing skill from my profile
 
 Scenario: As a user, I want to Edit the existing skills by giving same skill and different level in my profile
 	When I update the skill and skill level:
-	| ExistingSkill | SkillToUpdate   | SkillLevelToUpdate |
-	| Communication | Communication | Intermediate            |
-	Then I should see the success message and updated skill in my profile
+		| ExistingSkill | SkillToUpdate | SkillLevelToUpdate |
+		| Communication | Communication | Intermediate       |
+	Then I should see the success message and updated skills in my profile
 	   
 
 
-	
+			
 
 
 

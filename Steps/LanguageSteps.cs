@@ -37,7 +37,7 @@ namespace qa_dotnet_cucumber.Steps
         {
             _languagePage.DeleteAllLanguages(); //Delete all the languages in the list before adding new
 
-            var languagesToAdd = languageTable.CreateSet<AddLanguage>();  
+            var languagesToAdd = languageTable.CreateSet<AddLanguage>();
             var _actualAddLanguages = new List<string>();
             var _expectedAddLanguages = new List<string>();
             foreach (var addNewList in languagesToAdd)
@@ -64,7 +64,7 @@ namespace qa_dotnet_cucumber.Steps
             }
         }
 
-        [Then("I should see the languages listed in my profile and verify it")]    //Table data list validation after adding
+        [Then("I should see the languages listed in my profile and verify it")]   //Table data list validation after adding
         public void ThenIShouldSeeTheLanguagesListedInMyProfileAndVerifyIt()
         {
             var _actual = _languagePage.GetAllAddedLanguages();
@@ -181,39 +181,62 @@ namespace qa_dotnet_cucumber.Steps
             Thread.Sleep(3000);
         }
 
-        [Then("I click edit icon of {string}, leave the language field empty,choose the language level and click the Update button")]
-        public void ThenIClickEditIconOfLeaveTheLanguageFieldEmptyChooseTheLanguageLevelAndClickTheUpdateButton(string existingLanguage)
+        [When("I click edit icon of {string}, leave the language field empty,choose the language level and click the Update button")]
+        public void WhenIClickEditIconOfLeaveTheLanguageFieldEmptyChooseTheLanguageLevelAndClickTheUpdateButton(string existingLanguage)
         {
             _languagePage.LeaveTheLanguageFieldEmptyForUpdate(existingLanguage);
         }
 
-        [Then("I click edit icon of {string}, enter the language field, not choosing the language level and click the Update button")]
-        public void ThenIClickEditIconOfEnterTheLanguageFieldNotChoosingTheLanguageLevelAndClickTheUpdateButton(string existingLanguage)
+        [When("I click edit icon of {string}, enter the language field, not choosing the language level and click the Update button")]
+        public void WhenIClickEditIconOfEnterTheLanguageFieldNotChoosingTheLanguageLevelAndClickTheUpdateButton(string existingLanguage)
         {
             _languagePage.NotChoosingLanguageLevelForUpdate(existingLanguage);
         }
 
-       [When("I click edit icon of {string}, empty the language field, not choosing the language level and click the Update button")]
+        [When("I click edit icon of {string}, empty the language field, not choosing the language level and click the Update button")]
         public void WhenIClickEditIconOfEmptyTheLanguageFieldNotChoosingTheLanguageLevelAndClickTheUpdateButton(string existingLanguage)
         {
             _languagePage.LeaveTheLanguageFieldEmptyAndNotChoosingLanguageLevelForUpdate(existingLanguage);
-        }     
+        }
 
         [Then("I should see {string} error message")]
         public void ThenIShouldSeeErrorMessage(string error)
         {
-             Assert.That(_languagePage.IsErrorMessageDisplayed(error), Is.True, $"Error Message '{error}' should be displayed");
+            Assert.That(_languagePage.IsErrorMessageDisplayed(error), Is.True, $"Error Message '{error}' should be displayed");
         }
 
-        [When("I click Add New button, enter the language and it's level or leave empty and click Cancel button")]
-        public void WhenIClickAddNewButtonEnterTheLanguageAndItsLevelOrLeaveEmptyAndClickCancelButton()
+        [When("I click Add New button, enter the language {string} and it's level {string}")]
+        public void WhenIClickAddNewButtonEnterTheLanguageAndItsLevel(string languageToCancel, string levelToCancel)
         {
             _languagePage.DeleteAllLanguages();
-            _languagePage.LeaveTheLanguageFieldEmptyForAdd();
-            // _languagePage.NotChoosingLanguageLevelForAdd();
-            // _languagePage.LeaveTheLanguageFieldEmptyAndNotChoosingLanguageLevelForAdd();
-            _languagePage.ClickCancelButton();
+            _languagePage.EnterNewLanguageAndLevelToAdd(languageToCancel, levelToCancel);
         }
+
+        [Then("I should able to Cancel the operation and verify that the language {string} shouldn't be added")]
+        public void ThenIShouldAbleToCancelTheOperationAndVerifyThatTheLanguageShouldntBeAdded(string language)
+        {
+            _languagePage.ClickCancelButton();
+            Assert.That(_languagePage.IsLanguageNotAdded(language), Is.True, $"{language} is added!");
+        }
+
+        [When("I click edit icon of {string} and Update level to {string} and level to {string}")]
+        public void WhenIClickEditIconOfAndUpdateLevelToAndLevelTo(string languageToUpdate, string language, string level)
+        {
+            _languagePage.EnterLanguageAndLevelToUpdate(languageToUpdate, language, level);
+        }
+
+        [When("I click cancel")]
+        public void WhenIClickCancel()
+        {
+            _languagePage.ClickCancelUpdate();
+        }
+
+        [Then("the language {string} should remain unchanged with level {string}")]
+        public void ThenTheLanguageShouldRemainUnchangedWithLevel(string language, string level)
+        {
+           Assert.That(_languagePage.GetLevelOfLanguage(language), Is.EqualTo(level), $"{language} is updated!");
+        }
+
 
         [Then("I should able to Cancel the operation and verify that no changes has happened")]
         public void ThenIShouldAbleToCancelTheOperationAndVerifyThatNoChangesHasHappened()
@@ -246,7 +269,7 @@ namespace qa_dotnet_cucumber.Steps
             _languagePage.UpdateLanguageAndLevel("Russian", "Chinese", "Basic");
         }
 
-        [When("I want to delete any languages when the session is expired")]  
+        [When("I want to delete any languages when the session is expired")]
         public void WhenIWantToDeleteAnyLanguagesWhenTheSessionIsExpired()
         {
             _languagePage.DeleteAllLanguages();

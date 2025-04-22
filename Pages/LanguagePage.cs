@@ -1,4 +1,5 @@
-﻿using DocumentFormat.OpenXml.Drawing.Charts;
+﻿using System.Reflection.Metadata.Ecma335;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using RazorEngine;
@@ -37,7 +38,7 @@ namespace qa_dotnet_cucumber.Pages
 
 
         //Action Methods
-        public void NavigateToTheProfilePage()  
+        public void NavigateToTheProfilePage()
         {
             //Profile 
             var profileElement = _wait.Until(ExpectedConditions.ElementToBeClickable(ProfileTab));
@@ -47,7 +48,7 @@ namespace qa_dotnet_cucumber.Pages
             var languagesElement = _wait.Until(ExpectedConditions.ElementToBeClickable(LanguagesTab));
             languagesElement.Click();
         }
-        
+
         public void AddNewLanguageAndLevel(string language, string languagelevel) //To Add new language and it's level
         {
             //Add New Languages
@@ -65,6 +66,24 @@ namespace qa_dotnet_cucumber.Pages
             SelectElement selectElement = new SelectElement(selectLanguageLevelDropDown);
             selectElement.SelectByText(languagelevel);
             ClickAddButton();
+        }
+
+        public void EnterNewLanguageAndLevelToAdd(string language, string languageLevel)
+        {
+            //Add New Languages
+            var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
+            var addNewElement = languageTable.FindElement(By.XPath(".//div[@class='ui teal button ' and normalize-space(text())='Add New']"));
+            addNewElement.Click();
+
+            //Enter Language
+            var addLanguagesElement = _wait.Until(ExpectedConditions.ElementToBeClickable(AddLanguagesField));
+            addLanguagesElement.SendKeys(language);
+
+            //Select Language Level
+            var selectLanguageLevelDropDown = _wait.Until(ExpectedConditions.ElementToBeClickable(SelectLanguageLevel));
+
+            SelectElement selectElement = new SelectElement(selectLanguageLevelDropDown);
+            selectElement.SelectByText(languageLevel);
         }
 
         private void ClickAddButton()   //Click Add Button
@@ -101,6 +120,33 @@ namespace qa_dotnet_cucumber.Pages
                 selectElement.SelectByText(levelToUpdate);
 
                 editableRow.FindElement(UpdateButton).Click();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        public void EnterLanguageAndLevelToUpdate(string existingLanguage, string languageToUpdate, string levelToUpdate) //To update language and it's level
+        {
+            try
+            {
+                var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
+                var row = languageTable.FindElement(By.XPath($".//tr[td[normalize-space(text())='{existingLanguage}']]"));
+                var editIcon = row.FindElement(By.XPath(".//i[@class='outline write icon']"));
+                editIcon.Click();
+
+                var editableRow = languageTable.FindElement(By.XPath($".//tr[.//input[@type='text' and @value='{existingLanguage}']]"));
+                //Update the language
+                var addLanguageForUpdateElement = editableRow.FindElement(AddLanguageForUpdateField);
+                addLanguageForUpdateElement.Clear();
+                addLanguageForUpdateElement.SendKeys(languageToUpdate);
+
+                //Update Language Level
+                var selectLanguageLevelDropDown = editableRow.FindElement(By.XPath(".//select[@name='level']"));
+
+                SelectElement selectElement = new SelectElement(selectLanguageLevelDropDown);
+                selectElement.SelectByText(levelToUpdate);
             }
             catch (Exception ex)
             {
@@ -153,7 +199,11 @@ namespace qa_dotnet_cucumber.Pages
             while (true)
             {
                 var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
+
+                var originalWait = _driver.Manage().Timeouts().ImplicitWait; // Reset the wait to 2 seconds because it waits for 10 seconds for the last iteration 
+                ResetWaitTo(2);
                 var deleteElements = languageTable.FindElements(By.XPath(".//i[@class='remove icon']"));
+                ResetWaitTo(originalWait.Seconds);
 
                 if (deleteElements.Count > 0)
                 {
@@ -165,6 +215,11 @@ namespace qa_dotnet_cucumber.Pages
                     break;
                 }
             }
+        }
+
+        private void ResetWaitTo(int seconds)
+        {
+            _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(seconds);
         }
 
         public void LeaveTheLanguageFieldEmptyForAdd()    //To leave the language field empty for adding languages
@@ -343,6 +398,21 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
+        public string GetLevelOfLanguage(string language)
+        {
+            try
+            {
+                var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
+                var row = languageTable.FindElement(By.XPath($".//tr[td[normalize-space(text())='{language}']]"));
+                var levelCell = row.FindElement(By.XPath("./td[2]"));
+                return levelCell.Text.Trim();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
         public Table ConvertListToTable(List<string> addedLanguages, string columnHeader)  //Convert List collection into Table
         {
             var table = new Table(columnHeader);
@@ -351,6 +421,19 @@ namespace qa_dotnet_cucumber.Pages
                 table.AddRow(language);
             }
             return table;
+        }
+
+        public string GetSuccessMessageForUpdate(string languageToBeUpdated) //To get success message for update for validation
+        {
+            try
+            {
+                var successMessageForUpdate = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and  contains(text(), '{languageToBeUpdated} has been updated to your languages')]")));
+                return successMessageForUpdate.Text;
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
 
         public List<string> GetAllUpdatedLanguages() //To get the languages list after updating for validation
@@ -373,19 +456,6 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
-        public string GetSuccessMessageForUpdate(string languageToBeUpdated) //To get success message for update for validation
-        {
-            try
-            {
-                var successMessageForUpdate = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and  contains(text(), '{languageToBeUpdated} has been updated to your languages')]")));
-                return successMessageForUpdate.Text;
-            }
-            catch
-            {
-                return string.Empty;
-            }
-        }
-
         public string GetSuccessMessageForDelete(string languageToBeDeleted) //To get the success message after deleting
         {
             Thread.Sleep(5000);
@@ -399,14 +469,14 @@ namespace qa_dotnet_cucumber.Pages
             var rows = languageTable.FindElements(By.XPath(".//tbody/tr"));
             return rows.Count == 0;
         }
-       
+
         public bool IsErrorMessageDisplayed(string error)  //Error Message for both and any of the fields empty
         {
             try
             {
                 var popUpMessageElement = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[contains(@class, 'ns-type-error') and contains(@class, 'ns-show')]/div[@class='ns-box-inner' and contains(text(), '{error}')]")));
                 return true;// Found the Error message
-            } 
+            }
 
             catch (Exception ex)
             {
@@ -414,8 +484,8 @@ namespace qa_dotnet_cucumber.Pages
                 return false;
             }
         }
-       
-        public bool IsCancelButtonNotDisplayed()  //Ckeck the visiblity of cancel button 
+
+        public bool IsCancelButtonNotDisplayed()  //Check the visibility of cancel button 
         {
             try
             {
@@ -438,6 +508,21 @@ namespace qa_dotnet_cucumber.Pages
             {
 
             }
+        }
+
+        public bool IsLanguageNotAdded(string language) // This function should return true when the language is not added else should return false; 
+        {
+            try
+            {
+                var languageTable = _wait.Until(ExpectedConditions.ElementIsVisible(LanguageTable));
+                var row = languageTable.FindElement(By.XPath($".//tr[td[normalize-space(text())='{language}']]"));
+                return false;
+            }
+            catch
+            {
+                return true;
+            }
+
         }
     }
 

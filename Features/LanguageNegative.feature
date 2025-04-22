@@ -20,22 +20,28 @@ Scenario: As a user, I shouldn't able to add languages by empty the language fie
 
 Scenario: As a user, I shouldn't able to update languages and it's level by giving language field empty
 	When I add language "French" and it's level "Fluent"
-	Then I click edit icon of "French", leave the language field empty,choose the language level and click the Update button
+	And I click edit icon of "French", leave the language field empty,choose the language level and click the Update button
 	Then I should see "Please enter language and level" error message
 
 Scenario: As a user, I shouldn't able to update languages and it's level by not choosing the language level
 	When I add language "French" and it's level "Fluent"
-	Then I click edit icon of "French", enter the language field, not choosing the language level and click the Update button
+	And I click edit icon of "French", enter the language field, not choosing the language level and click the Update button
 	Then I should see "Please enter language and level" error message
 
 Scenario: As a user, I shouldn't able to update languages by empty the language field and not choosing the language level
 	When I add language "French" and it's level "Fluent"
-	When I click edit icon of "French", empty the language field, not choosing the language level and click the Update button
+	And I click edit icon of "French", empty the language field, not choosing the language level and click the Update button
 	Then I should see "Please enter language and level" error message
 
-Scenario: As a user, I should able to Cancel the operation (Add, Edit)
-	When I click Add New button, enter the language and it's level or leave empty and click Cancel button
-	Then I should able to Cancel the operation and verify that no changes has happened
+Scenario: As a user, I should able to Cancel the Add operation
+	When I click Add New button, enter the language "Spanish" and it's level "Native/Bilingual"
+	Then I should able to Cancel the operation and verify that the language "Spanish" shouldn't be added
+
+Scenario: As a user, I should able to Cancel the Update operation
+	When I add language "French" and it's level "Fluent"
+	And I click edit icon of "French" and Update level to "Japanese" and level to "Native/Bilingual"
+	And I click cancel
+	Then the language "French" should remain unchanged with level "Fluent"
 
 Scenario: As a user, I shouldn't able to add the same language and different level
 	When I Add the following New Language and select New Language level:

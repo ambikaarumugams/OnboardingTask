@@ -7,7 +7,6 @@ namespace qa_dotnet_cucumber.Steps
     [Binding]
     [Scope(Feature = "Skills")]
     [Scope(Feature = "SkillsNegative")]
-    //[Parallelizable(ParallelScope.All)]    
     public class SkillsSteps
     {
         private readonly LoginPage _loginPage;
@@ -42,8 +41,7 @@ namespace qa_dotnet_cucumber.Steps
             {
                 _expectedSkillsToAdd.Add(skill.NewSkills);
                 _skillsPage.AddNewSkillsAndLevel(skill.NewSkills, skill.SkillLevel);
-                _skillsPage.ClickAddButton();
-                var successMessageAfterAddingSkill = _skillsPage.GetSuccessMeassageForAddSkill(skill.NewSkills);
+                var successMessageAfterAddingSkill = _skillsPage.GetSuccessMessageForAddSkill(skill.NewSkills);
                 _actualAddedSkills.Add(successMessageAfterAddingSkill);
             }
             _scenarioContext.Set(_actualAddedSkills, "ActualSkillsAdded");
@@ -141,7 +139,7 @@ namespace qa_dotnet_cucumber.Steps
         public void WhenIClickAddNewButtonLeaveTheSkillFieldEmptyChooseTheSkillLevelAndClickTheAddButton()
         {
             _skillsPage.DeleteAllSkills();
-            _skillsPage.LeaveTheSkillFieldEmpty();
+            _skillsPage.LeaveTheSkillFieldEmptyForAdd();
             _skillsPage.ClickAddButton();
         }
 
@@ -155,7 +153,7 @@ namespace qa_dotnet_cucumber.Steps
         public void WhenIClickAddNewButtonEnterTheSkillFieldNotChoosingTheSkillLevelAndClickTheAddButton()
         {
             _skillsPage.DeleteAllSkills();
-            _skillsPage.NotChoosingSkillLevel();
+            _skillsPage.NotChoosingSkillLevelForAdd();
             _skillsPage.ClickAddButton();
         }
 
@@ -163,18 +161,94 @@ namespace qa_dotnet_cucumber.Steps
         public void WhenIClickAddNewButtonEmptyTheSkillFieldNotChoosingTheSkillLevelAndClickTheAddButton()
         {
             _skillsPage.DeleteAllSkills();
-            _skillsPage.LeaveTheSkillFieldEmptyAndNotChoosingSkillLevel();
+            _skillsPage.LeaveTheSkillFieldEmptyAndNotChoosingSkillLevelForAdd();
             _skillsPage.ClickAddButton();
         }
 
-        [When("I click Add New button, enter the skill and it's level or leave empty and click Cancel button")]
-        public void WhenIClickAddNewButtonEnterTheSkillAndItsLevelOrLeaveEmptyAndClickCancelButton()
+        [When("I add skill {string} and it's level {string}")]
+        public void WhenIAddSkillAndItsLevel(string skill, string level)
         {
             _skillsPage.DeleteAllSkills();
-            _skillsPage.LeaveTheSkillFieldEmpty();
-            //_skillsPage.NotChoosingSkillLevel();
-            //_skillsPage.LeaveTheSkillFieldEmptyAndNotChoosingSkillLevel();
+            _skillsPage.AddNewSkillsAndLevel(skill,level);
+        }
+
+        [When("I click edit icon of {string}, leave the skill field empty,choose the skill level and click the Update button")]
+        public void WhenIClickEditIconOfLeaveTheSkillFieldEmptyChooseTheSkillLevelAndClickTheUpdateButton(string existingSkill)
+        {
+            _skillsPage.LeaveTheSkillFieldEmptyForUpdate(existingSkill);
+        }
+
+        [When("I click edit icon of {string}, enter the skill field, not choosing the skill level and click the Update button")]
+        public void WhenIClickEditIconOfEnterTheSkillFieldNotChoosingTheSkillLevelAndClickTheUpdateButton(string existingSkill)
+        {
+            _skillsPage.NotChoosingSkillLevelForUpdate(existingSkill);
+        }
+
+        [When("I click edit icon of {string}, empty the skill field, not choosing the skill level and click the Update button")]
+        public void WhenIClickEditIconOfEmptyTheSkillFieldNotChoosingTheSkillLevelAndClickTheUpdateButton(string existingSkill)
+        {
+            _skillsPage.LeaveTheSkillFieldEmptyAndNotChoosingSkillLevelForUpdate(existingSkill);
+        }
+
+        [When("I click Add New Skill {string} with level {string}")]
+        public void WhenIClickAddNewSkillWithLevel(string skill, string level)
+        {
+            _skillsPage.DeleteAllSkills();
+            _skillsPage.AddNewSkillsAndLevel(skill, level);
+        }
+
+        [When("I click edit icon of {string} and Update skill to {string} and level to {string}")]
+        public void WhenIClickEditIconOfAndUpdateSkillToAndLevelTo(string skillToUpdate, string skill, string level)
+        {
+            _skillsPage.EnterSkillsAndLevelToUpdate(skillToUpdate, skill, level);
+        }
+
+        [When("I click cancel")]
+        public void WhenIClickCancel()
+        {
+            _skillsPage.ClickCancelUpdate();
+        }
+
+        [Then("the skill {string} should remain unchanged with level {string}")]
+        public void ThenTheSkillShouldRemainUnchangedWithLevel(string skill, string level)
+        {
+            Assert.That(_skillsPage.GetLevelOfSkill(skill),Is.EqualTo(level)  , $"Skill is Updated!");
+        }
+
+        [When("I click Add New button, enter the Skill {string} and it's level {string}")]
+        public void WhenIClickAddNewButtonEnterTheSkillAndItsLevel(string skill, string level)
+        {
+            _skillsPage.DeleteAllSkills();
+            _skillsPage.EnterNewSkillsAndLevelToAdd(skill, level);
+        }
+
+        [Then("I should able to Cancel the operation and verify that the skill {string} shouldn't be added")]
+        public void ThenIShouldAbleToCancelTheOperationAndVerifyThatTheSkillShouldntBeAdded(string skill)
+        {
             _skillsPage.ClickCancelButton();
+            Assert.That(_skillsPage.IsSkillNotAdded(skill),Is.True,$"{skill} is Added!");
+        }
+
+        [When("I Add the same Skills and different SkillLevel:")]
+        public void WhenIAddTheSameSkillsAndDifferentSkillLevel(Table skillsTable)
+        {
+            _skillsPage.DeleteAllSkills();
+            var skillsToAdd = skillsTable.CreateSet<AddSkills>();
+            foreach (var skill in skillsToAdd)
+            {
+                _skillsPage.AddNewSkillsAndLevel(skill.NewSkills, skill.SkillLevel);
+            }
+        }
+
+        [When("I Add the same Skills and same SkillLevel:")]
+        public void WhenIAddTheSameSkillsAndSameSkillLevel(Table skillsTable)
+        {
+            _skillsPage.DeleteAllSkills();
+            var skillsToAdd = skillsTable.CreateSet<AddSkills>();
+            foreach (var skill in skillsToAdd)
+            {
+                _skillsPage.AddNewSkillsAndLevel(skill.NewSkills, skill.SkillLevel);
+            }
         }
 
         [Then("I should able to Cancel the operation and verify that no changes has happened")]
@@ -186,16 +260,43 @@ namespace qa_dotnet_cucumber.Steps
         [Then("I should see the error message {string}")]
         public void ThenIShouldSeeTheErrorMessage(string errorMessage)
         {
-            Thread.Sleep(1000);
             Assert.That(_skillsPage.IsErrorMessageDisplayed(errorMessage), Is.True, $"Error Message {errorMessage} should be displayed");
         }
 
-        [Then("I should see the success message and updated skill in my profile")]
-        public void ThenIShouldSeeTheSuccessMessageAndUpdatedSkillInMyProfile()
+        [When("I update the skill {string} with same value")]
+        public void WhenIUpdateTheSkillWithSameValue(string skill)
         {
-          
+            _skillsPage.DeleteAllSkills();
+            _skillsPage.AddNewSkillsAndLevel(skill);
+            _skillsPage.UpdateSkillsAndLevel(skill, skill);
         }
 
+        [When("I want to add any skills when the session is expired")]
+        public void WhenIWantToAddAnySkillsWhenTheSessionIsExpired()
+        {
+            _skillsPage.DeleteAllSkills();
+            _skillsPage.ExpireSession();
+            _skillsPage.AddNewSkillsAndLevel("Gardening");
+        }
+
+        [When("I want to update any skills when the session is expired")]
+        public void WhenIWantToUpdateAnySkillsWhenTheSessionIsExpired()
+        {
+           _skillsPage.DeleteAllSkills();
+           _skillsPage.AddNewSkillsAndLevel("Gardening");
+           _skillsPage.ExpireSession();
+           _skillsPage.UpdateSkillsAndLevel("Gardening","Landscaping");
+        }
+
+        [When("I want to delete any skills when the session is expired")]
+        public void WhenIWantToDeleteAnySkillsWhenTheSessionIsExpired()
+        {
+            _skillsPage.DeleteAllSkills();
+            _skillsPage.AddNewSkillsAndLevel("Gardening");
+            _skillsPage.ExpireSession();
+            _skillsPage.DeleteSpecificSkills("Gardening");
+        }
+        
         private class AddSkills
         {
             public string NewSkills { get; set; }

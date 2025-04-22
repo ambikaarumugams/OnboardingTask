@@ -45,7 +45,13 @@ namespace qa_dotnet_cucumber.Pages
             skillsElement.Click();
         }
 
-        public void AddNewSkillsAndLevel(string skills, string skillLevel)
+        public void AddNewSkillsAndLevel(string skills, string skillLevel = "Beginner")
+        {
+            EnterNewSkillsAndLevelToAdd(skills, skillLevel);
+            ClickAddButton();
+        }
+
+        public void EnterNewSkillsAndLevelToAdd(string skills, string skillLevel)
         {
             //Add New Skills
             var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
@@ -77,7 +83,7 @@ namespace qa_dotnet_cucumber.Pages
             cancelButton.Click();
         }
 
-        public void UpdateSkillsAndLevel(string existingSkill, string skillToUpdate, string skillLevelToUpdate)
+        public void UpdateSkillsAndLevel(string existingSkill, string skillToUpdate, string skillLevelToUpdate = "Beginner")
         {
             try
             {
@@ -106,6 +112,63 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
+        public void EnterSkillsAndLevelToUpdate(string existingSkill, string skillToUpdate, string skillLevelToUpdate)
+        {
+            try
+            {
+                var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+                var row = skillsTable.FindElement(By.XPath($".//tr[td[normalize-space(text())='{existingSkill}']]"));
+                var editIcon = row.FindElement(By.XPath(".//i[@class='outline write icon']"));
+                editIcon.Click();
+
+                var editableRow = skillsTable.FindElement(By.XPath($".//tr[.//input[@type='text' and @value='{existingSkill}']]"));
+                //Update the Skill
+                var addSkillsForUpdateElement = editableRow.FindElement(AddSkillsForUpdateField);
+                addSkillsForUpdateElement.Clear();
+                Thread.Sleep(1000);
+                addSkillsForUpdateElement.SendKeys(skillToUpdate);
+
+                //Update Skill Level
+                var selectSkillLevelDropDown = editableRow.FindElement(By.XPath(".//select[@name='level']"));
+
+                SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
+                selectElement.SelectByText(skillLevelToUpdate);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        public string GetLevelOfSkill(string skill)
+        {
+            try
+            {
+                var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+                var row = skillsTable.FindElement(By.XPath($".//tr[td[normalize-space(text())='{skill}']]"));
+                var levelCell = row.FindElement(By.XPath("./td[2]"));
+                return levelCell.Text.Trim();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        public bool IsSkillNotAdded(string skill)
+        {
+            try
+            {
+                var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+                var row = skillsTable.FindElement(By.XPath($".//tr[td[normalize-space(text())='{skill}']]")); 
+                return false;
+            }
+            catch
+            {
+                return true;
+            }
+        }
+
         public void ClickCancelUpdate()  //CancelUpdate
         {
             var clickCancelUpdate = _wait.Until(ExpectedConditions.ElementToBeClickable(CancelUpdateButton));
@@ -128,8 +191,10 @@ namespace qa_dotnet_cucumber.Pages
             while (true)
             {
                 var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+                var originalWait = _driver.Manage().Timeouts().ImplicitWait;
+                ResetWaitTo(2);
                 var deleteElements = skillsTable.FindElements(By.XPath(".//i[@class='remove icon']"));
-
+                ResetWaitTo(originalWait.Seconds);
                 if (deleteElements.Count > 0)
                 {
                     deleteElements[0].Click();
@@ -142,7 +207,153 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
-        public string GetSuccessMeassageForAddSkill(string newSkill)  //To get the success message after adding skill for validation
+        private void ResetWaitTo(int seconds)
+        {
+            _driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(seconds);
+        }
+        public void LeaveTheSkillFieldEmptyForAdd()    //To leave the skill field empty for adding skills
+        {
+            //Click Add New Button
+            var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+            var addNewElement = skillsTable.FindElement(By.XPath(".//div[@class='ui teal button']"));
+            addNewElement.Click();
+
+            //Enter Skills
+            var addSkillsElement = _wait.Until(ExpectedConditions.ElementToBeClickable(AddSkillsField));
+            addSkillsElement.SendKeys(Keys.Control + "a" + Keys.Delete);
+
+            //Select Skill Level
+            var selectSkillLevelDropDown = _wait.Until(ExpectedConditions.ElementToBeClickable(SelectSkillLevel));
+
+            SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
+            selectElement.SelectByText("Intermediate");
+            // selectElement.SelectByValue("");
+            ClickAddButton();
+        }
+
+        public void NotChoosingSkillLevelForAdd()   //Not choosing the skill level for adding skills
+        {
+            //Click Add New Button
+            var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+            var addNewElement = skillsTable.FindElement(By.XPath(".//div[@class='ui teal button']"));
+            addNewElement.Click();
+
+            //Enter Skills
+            var addSkillsElement = _wait.Until(ExpectedConditions.ElementToBeClickable(AddSkillsField));
+            addSkillsElement.SendKeys("Dancing");
+
+            //Select Skill Level
+            var selectSkillLevelDropDown = _wait.Until(ExpectedConditions.ElementToBeClickable(SelectSkillLevel));
+
+            SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
+            selectElement.SelectByText("Choose Skill Level");
+            //  selectElement.SelectByValue("");
+            ClickAddButton();
+        }
+
+        public void LeaveTheSkillFieldEmptyAndNotChoosingSkillLevelForAdd()   //Not selecting both skill and it's level for adding skills
+        {
+            //Click Add New Button
+            var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+            var addNewElement = skillsTable.FindElement(By.XPath(".//div[@class='ui teal button']"));
+            addNewElement.Click();
+
+            //Enter Skills
+            var addSkillsElement = _wait.Until(ExpectedConditions.ElementToBeClickable(AddSkillsField));
+            addSkillsElement.SendKeys(Keys.Control + "a" + Keys.Delete);
+
+            //Select Skill Level
+            var selectSkillLevelDropDown = _wait.Until(ExpectedConditions.ElementToBeClickable(SelectSkillLevel));
+
+            SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
+            selectElement.SelectByText("Choose Skill Level");
+            // selectElement.SelectByValue("");
+            ClickAddButton();
+        }
+
+        public void LeaveTheSkillFieldEmptyForUpdate(string existingSkill)    //To leave the skill field empty for updating skill
+        {
+            try
+            {
+                var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+                var row = skillsTable.FindElement(By.XPath($".//tr[td[normalize-space(text())='{existingSkill}']]"));
+                var editIcon = row.FindElement(By.XPath(".//i[@class='outline write icon']"));
+                editIcon.Click();
+
+                var editableRow = skillsTable.FindElement(By.XPath($".//tr[.//input[@type='text' and @value='{existingSkill}']]"));
+                //Update the Skill
+                var addSkillsForUpdateElement = editableRow.FindElement(AddSkillsForUpdateField);
+                addSkillsForUpdateElement.SendKeys(Keys.Control + "a" + Keys.Delete);
+
+                editableRow.FindElement(UpdateButton).Click();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        public void NotChoosingSkillLevelForUpdate(string existingSkill)   //Not choosing the skill level for updating skill
+        {
+            try
+            {
+                var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+                var row = skillsTable.FindElement(By.XPath($".//tr[td[normalize-space(text())='{existingSkill}']]"));
+                var editIcon = row.FindElement(By.XPath(".//i[@class='outline write icon']"));
+                editIcon.Click();
+
+                var editableRow = skillsTable.FindElement(By.XPath($".//tr[.//input[@type='text' and @value='{existingSkill}']]"));
+                //Update the Skill
+                var addSkillsForUpdateElement = editableRow.FindElement(AddSkillsForUpdateField);
+                addSkillsForUpdateElement.Clear();
+                Thread.Sleep(1000);
+                addSkillsForUpdateElement.SendKeys("Teaching");
+
+                //Update Skill Level
+                var selectSkillLevelDropDown = editableRow.FindElement(By.XPath(".//select[@name='level']"));
+
+                SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
+                selectElement.SelectByText("Skill Level");
+                // selectElement.SelectByValue("");
+                editableRow.FindElement(UpdateButton).Click();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        public void LeaveTheSkillFieldEmptyAndNotChoosingSkillLevelForUpdate(string existingSkill)   //Not selecting both skill and level for updating skill
+        {
+            try
+            {
+                var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
+                var row = skillsTable.FindElement(By.XPath($".//tr[td[normalize-space(text())='{existingSkill}']]"));
+                var editIcon = row.FindElement(By.XPath(".//i[@class='outline write icon']"));
+                editIcon.Click();
+
+                var editableRow = skillsTable.FindElement(By.XPath($".//tr[.//input[@type='text' and @value='{existingSkill}']]"));
+                //Update the Skill
+                var addSkillsForUpdateElement = editableRow.FindElement(AddSkillsForUpdateField);
+                addSkillsForUpdateElement.Clear();
+                Thread.Sleep(1000);
+                addSkillsForUpdateElement.SendKeys(Keys.Control + "a" + Keys.Delete);
+
+                //Update Skill Level
+                var selectSkillLevelDropDown = editableRow.FindElement(By.XPath(".//select[@name='level']"));
+
+                SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
+                selectElement.SelectByText("Skill Level");
+                // selectElement.SelectByValue("");
+                editableRow.FindElement(UpdateButton).Click();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        public string GetSuccessMessageForAddSkill(string newSkill)  //To get the success message after adding skill for validation
         {
             var successMessageForAddSkill = _wait.Until(ExpectedConditions.ElementIsVisible(By.XPath($"//div[@class='ns-box-inner' and contains(text(), '{newSkill} has been added to your skills')]")));
             return successMessageForAddSkill.Text;
@@ -208,62 +419,6 @@ namespace qa_dotnet_cucumber.Pages
             return rows.Count == 0;
         }
 
-        public void LeaveTheSkillFieldEmpty()    //To leave the skill field empty
-        {
-            //Click Add New Button
-            var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
-            var addNewElement = skillsTable.FindElement(By.XPath(".//div[@class='ui teal button']"));
-            addNewElement.Click();
-
-            //Enter Skills
-            var addSkillsElement = _wait.Until(ExpectedConditions.ElementToBeClickable(AddSkillsField));
-            addSkillsElement.SendKeys("");
-
-            //Select Skill Level
-            var selectSkillLevelDropDown = _wait.Until(ExpectedConditions.ElementToBeClickable(SelectSkillLevel));
-
-            SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
-            selectElement.SelectByText("Intermediate");
-        }
-
-        public void NotChoosingSkillLevel()   //Not choosing the skill level
-        {
-            //Click Add New Button
-            var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
-            var addNewElement = skillsTable.FindElement(By.XPath(".//div[@class='ui teal button']"));
-            addNewElement.Click();
-
-            //Enter Skills
-            var addSkillsElement = _wait.Until(ExpectedConditions.ElementToBeClickable(AddSkillsField));
-            addSkillsElement.SendKeys("Dancing");
-
-            //Select Skill Level
-            var selectSkillLevelDropDown = _wait.Until(ExpectedConditions.ElementToBeClickable(SelectSkillLevel));
-
-            SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
-            selectElement.SelectByText("Choose Skill Level");
-            //  selectElement.SelectByValue("");
-        }
-
-        public void LeaveTheSkillFieldEmptyAndNotChoosingSkillLevel()   //Not selecting both skill and it's level
-        {
-            //Click Add New Button
-            var skillsTable = _wait.Until(ExpectedConditions.ElementIsVisible(SkillsTable));
-            var addNewElement = skillsTable.FindElement(By.XPath(".//div[@class='ui teal button']"));
-            addNewElement.Click();
-
-            //Enter Skills
-            var addSkillsElement = _wait.Until(ExpectedConditions.ElementToBeClickable(AddSkillsField));
-            addSkillsElement.SendKeys("");
-
-            //Select Skill Level
-            var selectSkillLevelDropDown = _wait.Until(ExpectedConditions.ElementToBeClickable(SelectSkillLevel));
-
-            SelectElement selectElement = new SelectElement(selectSkillLevelDropDown);
-            selectElement.SelectByText("Choose Skill Level");
-            // selectElement.SelectByValue("")
-        }
-
         public bool IsErrorMessageDisplayed(string error)  //Error Message for both and any of the fields empty
         {
             try
@@ -277,7 +432,7 @@ namespace qa_dotnet_cucumber.Pages
             }
         }
 
-        public bool IsCancelButtonNotDisplayed()       //Ckeck the visiblity of cancel button 
+        public bool IsCancelButtonNotDisplayed()       //Check the visibility of cancel button 
         {
             try
             {
@@ -287,6 +442,17 @@ namespace qa_dotnet_cucumber.Pages
             catch
             {
                 return false;
+            }
+        }
+        public void ExpireSession() //To delete the token to get the session timeout message
+        {
+            try
+            {
+                _driver.Manage().Cookies.DeleteCookieNamed("marsAuthToken");
+            }
+            catch
+            {
+
             }
         }
     }
